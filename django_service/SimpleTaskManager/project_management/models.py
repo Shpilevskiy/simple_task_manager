@@ -17,4 +17,6 @@ class Task(models.Model):
                                 related_name='tasks',
                                 related_query_name='task')
 
-    performer = models.OneToOneField(User, on_delete=models.CASCADE)
+    performer = models.ForeignKey(User, on_delete=models.CASCADE,
+                                  related_name='tasks',
+                                  related_query_name='task')

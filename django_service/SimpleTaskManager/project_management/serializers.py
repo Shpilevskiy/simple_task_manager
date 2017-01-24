@@ -2,12 +2,17 @@ from django.contrib.auth.models import (
     User,
     Group
 )
+from django.utils import timezone
 
 from rest_framework import serializers
 
 from project_management.models import (
     Project,
     Task
+)
+
+from SimpleTaskManager.utils.url_kwargs_consts import (
+    PROJECT_URL_KWARG
 )
 
 
@@ -95,3 +100,18 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class ProjectMembersSerializer(ProjectSerializer):
     members = ProjectUserSerializer(many=True)
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ('id', 'title', 'description', 'due_date', 'performer')
+
+    def validate(self, data):
+        if data['due_date'] < timezone.datetime.now().date():
+            raise serializers.ValidationError({'due_date': 'due_date shall not be earlier than today.'})
+        return data
+
+    def create(self, validated_data):
+        validated_data[PROJECT_URL_KWARG] = self.context['view'].kwargs[PROJECT_URL_KWARG]
+        return Task.objects.create(**{k: v for k, v in validated_data.items() if v})
