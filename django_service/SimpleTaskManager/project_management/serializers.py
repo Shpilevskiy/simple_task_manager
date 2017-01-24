@@ -10,6 +10,7 @@ from project_management.models import (
     Project,
     Task
 )
+from project_management.tasks import send_email_task
 
 from SimpleTaskManager.utils.url_kwargs_consts import (
     PROJECT_URL_KWARG
@@ -49,7 +50,8 @@ class UserSerializer(serializers.ModelSerializer):
         user = User(
             email=validated_data['email'],
             username=validated_data['username'],
-            first_name=validated_data['first_name']
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
         )
         user.set_password(validated_data['password'])
         user.is_active = True
@@ -114,7 +116,15 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data[PROJECT_URL_KWARG] = self.context['view'].kwargs[PROJECT_URL_KWARG]
-        return Task.objects.create(**{k: v for k, v in validated_data.items() if v})
+        task = Task(**{k: v for k, v in validated_data.items() if v})
+        task.save()
+
+        mail_body = 'Hello {}!\n You have been appointed to a new task: {}\n Here is description:{}' \
+            .format(task.performer.username, task.title, task.description)
+
+        send_email_task.delay("New Task", mail_body, task.performer.email)
+
+        return task
 
 
 class TaskPerformerSerializer(TaskSerializer):
