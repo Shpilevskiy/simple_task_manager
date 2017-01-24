@@ -5,11 +5,16 @@ from django.contrib.auth.models import (
 
 from rest_framework import serializers
 
+from project_management.models import (
+    Project,
+    Task
+)
 
-# class GroupSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Group
-#     fields = ('name',)
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('id', 'name')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -69,3 +74,24 @@ class UserUpdateSerializer(UserSerializer):
         instance.save()
 
         return instance
+
+
+class ProjectUserSerializer(serializers.ModelSerializer):
+    groups = GroupSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'groups')
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True, max_length=250)
+    description = serializers.CharField(max_length=5000, required=False)
+
+    class Meta:
+        model = Project
+        fields = ('id', 'title', 'members', 'description')
+
+
+class ProjectMembersSerializer(ProjectSerializer):
+    members = ProjectUserSerializer(many=True)
