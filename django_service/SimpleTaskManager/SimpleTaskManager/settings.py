@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from kombu import Queue, Exchange
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
@@ -123,3 +125,37 @@ REST_FRAMEWORK = {
     ),
     'PAGE_SIZE': 10
 }
+
+
+REDIS_PORT = 6379
+REDIS_DB = 0
+REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'redis')
+
+RABBIT_HOSTNAME = os.environ.get('RABBIT_PORT_5672_TCP', 'messagequeue')
+BROKER_URL = 'amqp://guest:guest@messagequeue:5672//'
+
+BROKER_HEARTBEAT = '?heartbeat=30'
+if not BROKER_URL.endswith(BROKER_HEARTBEAT):
+    BROKER_URL += BROKER_HEARTBEAT
+
+BROKER_POOL_LIMIT = 1
+BROKER_CONNECTION_TIMEOUT = 10
+
+CELERY_DEFAULT_QUEUE = 'default'
+CELERY_QUEUES = (
+    Queue('default', Exchange('default'), routing_key='default'),
+)
+
+CELERY_ALWAYS_EAGER = False
+CELERY_ACKS_LATE = True
+CELERY_TASK_PUBLISH_RETRY = True
+CELERY_DISABLE_RATE_LIMITS = False
+
+CELERY_BROKER_URL = 'amqp://guest:guest@messagequeue:5672//'
+# CELERY_RESULT_BACKEND = 'redis://redis'
+CELERY_TASK_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ['application/json']
+
+CELERYD_HIJACK_ROOT_LOGGER = False
+CELERYD_PREFETCH_MULTIPLIER = 1
+CELERYD_MAX_TASKS_PER_CHILD = 1000
