@@ -1,0 +1,58 @@
+version: "2.0"
+
+services:
+    redis:
+      image: redis
+
+    messagequeue:
+      image: rabbitmq:3-management
+      ports:
+        - "15672:15672"
+
+    postgres:
+      image: postgres:9.4.4
+      ports:
+        - "5432:5432"
+      volumes:
+        - ./pgdata/:/var/lib/postgresql/data
+
+    nginx_service:
+#      restart: always
+      build: nginx_service
+      ports:
+        - "8080:80"
+      links:
+        - django_service
+      volumes:
+        - ./static/:/static
+      depends_on:
+        - django_service
+
+    django_service:
+      build: django_service
+      volumes:
+        - ./django_service:/api
+        - ./static/:/api/SimpleTaskManager/static
+      expose:
+        - "8000"
+      links:
+        - postgres:postgres
+      depends_on:
+        - messagequeue
+        - redis
+        - postgres
+
+    flower:
+      build: flower_service
+      links:
+        - redis
+        - messagequeue
+      depends_on:
+        - django_service
+        - redis
+        - messagequeue
+      ports:
+        - "5555:5555"
+      env_file:
+        - ./db.env
+        - ./celery.env
