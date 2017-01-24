@@ -12,14 +12,19 @@ from project_management.serializers import (
     UserUpdateSerializer,
     ProjectSerializer,
     ProjectMembersSerializer,
-    TaskSerializer
+    TaskSerializer,
+    TaskPerformerSerializer
 )
 
 from project_management.models import (
     Project,
     Task
 )
-from project_management.permissions import IsManagerUser
+from project_management.permissions import (
+    IsManagerUser,
+    IsManagerOrReadOnly,
+    IsManagerOrProjectMemberReadOnly
+)
 
 from SimpleTaskManager.utils.url_kwargs_consts import (
     USER_URL_KWARG,
@@ -46,20 +51,15 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ProjectListCreateView(generics.ListCreateAPIView):
-    permission_classes = (permissions.IsAuthenticated, IsManagerUser)
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrReadOnly)
     serializer_class = ProjectSerializer
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return ProjectMembersSerializer
-        return ProjectSerializer
 
     def get_queryset(self):
         return Project.objects.all()
 
 
 class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (permissions.IsAuthenticated, IsManagerUser)
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrReadOnly)
     lookup_url_kwarg = PROJECT_URL_KWARG
 
     def get_serializer_class(self):
@@ -72,7 +72,7 @@ class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class TaskListCreateView(generics.ListCreateAPIView):
-    permission_classes = (permissions.IsAuthenticated, IsManagerUser)
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrProjectMemberReadOnly)
     serializer_class = TaskSerializer
 
     def get_queryset(self):
@@ -90,9 +90,14 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
 
 class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (permissions.IsAuthenticated, IsManagerUser)
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrProjectMemberReadOnly)
     serializer_class = TaskSerializer
     lookup_url_kwarg = TASK_URL_KWARG
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TaskPerformerSerializer
+        return TaskSerializer
 
     def get_queryset(self):
         return Task.objects.filter(

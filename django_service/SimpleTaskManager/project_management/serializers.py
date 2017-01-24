@@ -115,3 +115,7 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data[PROJECT_URL_KWARG] = self.context['view'].kwargs[PROJECT_URL_KWARG]
         return Task.objects.create(**{k: v for k, v in validated_data.items() if v})
+
+
+class TaskPerformerSerializer(TaskSerializer):
+    performer = ProjectUserSerializer()
