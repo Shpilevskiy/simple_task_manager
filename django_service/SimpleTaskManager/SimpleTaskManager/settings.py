@@ -74,11 +74,23 @@ WSGI_APPLICATION = 'SimpleTaskManager.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
+# sqlite Conf
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('DB_ENV_DB', 'postgres'),
+        'USER': os.environ.get('DB_ENV_POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_ENV_POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.environ.get('DB_PORT_5432_TCP_ADDR', 'postgres'),
+        'PORT': os.environ.get('DB_PORT_5432_TCP_PORT', ''),
+    },
 }
 
 # Password validation
@@ -126,6 +138,11 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_HOST_USER = 'SimpleTaskManager@yandex.ru'
+EMAIL_HOST_PASSWORD = 'SimpleTaskManagerVerySecretPassword'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 REDIS_PORT = 6379
 REDIS_DB = 0
