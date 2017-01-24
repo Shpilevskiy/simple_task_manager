@@ -13,7 +13,7 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True, )
+    email = serializers.EmailField(required=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     password = serializers.CharField(
@@ -24,13 +24,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'first_name', 'groups', 'last_name')
+        fields = ('id', 'username', 'email', 'password', 'first_name', 'groups', 'last_name')
         read_only_fields = ('is_staff', 'is_superuser', 'is_active', 'date_joined')
 
     def validate(self, data):
         if not data['groups']:
             raise serializers.ValidationError({'groups': 'Group is required.'})
-        if Group.objects.get(name='Developers') in data['groups']\
+        if Group.objects.get(name='Developers') in data['groups'] \
                 and Group.objects.get(name='Managers') in data['groups']:
             raise serializers.ValidationError({'error': 'User cannot be developer and manager at same time.'})
         return data
@@ -46,3 +46,26 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         user.groups.set(validated_data['groups'])
         return user
+
+
+class UserUpdateSerializer(UserSerializer):
+    password = serializers.CharField(
+        required=False,
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.email = validated_data.get('email', instance.email)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+
+        if 'groups' in validated_data:
+            instance.groups.set(validated_data['groups'])
+        instance.save()
+
+        return instance
