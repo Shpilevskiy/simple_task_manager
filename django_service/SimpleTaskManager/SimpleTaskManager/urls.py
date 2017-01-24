@@ -21,5 +21,6 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^api/admin/', admin.site.urls),
+    url(r'^api/management/', include('project_management.urls', namespace='project_management')),
     url(r'^api/api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

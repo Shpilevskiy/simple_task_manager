@@ -1,0 +1,8 @@
+- model: auth.Group
+  pk: 1
+  fields:
+    name: Developers
+- model: auth.Group
+  pk: 2
+  fields:
+    name: Managers
