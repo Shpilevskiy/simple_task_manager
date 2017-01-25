@@ -5,6 +5,7 @@
  - python
  - pip
  - git
+ - free 8080, 15672, 5432, 5555 ports
  
 ## How to launch:
  - git clone https://github.com/Shpilevskiy/simple_task_manager.git
