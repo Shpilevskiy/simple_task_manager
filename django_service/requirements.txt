@@ -7,3 +7,4 @@ pyyaml
 celery
 amqp
 psycopg2
+redis

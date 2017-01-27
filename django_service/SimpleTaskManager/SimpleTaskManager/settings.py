@@ -169,7 +169,7 @@ CELERY_TASK_PUBLISH_RETRY = True
 CELERY_DISABLE_RATE_LIMITS = False
 
 CELERY_BROKER_URL = 'amqp://guest:guest@messagequeue:5672//'
-# CELERY_RESULT_BACKEND = 'redis://redis'
+CELERY_RESULT_BACKEND = 'redis://redis'
 CELERY_TASK_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ['application/json']
 
